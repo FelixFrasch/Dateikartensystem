@@ -8,9 +8,9 @@ DATEIKARTE* addElement(DATEIKARTE** anfang, const char frage[], const char antwo
     if (neu == NULL) return NULL;
 
     strncpy(neu->frage, frage, FLENGTH-1); // Maximal FLENGTH-1 Zeichen werden kopiert
-    neu->frage[FLENGTH - 1] = '\0'; // Terminiert auch bei zulanem String
+    neu->frage[FLENGTH - 1] = '\0'; // Terminiert auch bei zu langem String
     strncpy(neu->antwort, antwort, ALENGTH-1);
-    neu->antwort[FLENGTH - 1] = '\0';
+    neu->antwort[ALENGTH - 1] = '\0';
 
     neu->next = NULL;
     neu->prev = NULL;

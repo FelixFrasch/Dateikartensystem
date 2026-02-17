@@ -13,7 +13,7 @@ void clearTerminal(int count);
 
 
 int main(void) {
-    char userInput;
+    char userInput = 0;
     clearTerminal(40);
     printInfo();
     DATEIKARTE *dateikarte = NULL;
@@ -23,12 +23,11 @@ int main(void) {
         clearTerminal(40);
         printInfo();
         printf("Auswahl: ");
-        if (scanf(" %c", &userInput) != 1) { // schreibt in userInput den char der Eingabe (Erstes Zeichen)
+        if (scanf(" %c", &userInput) != 1) { // Leerzeichen vor %c überspringt Whitespace (z.B. vorheriges \n)
             // wenn scanf fehlschlägt
             while (getchar() != '\n'); // leert Buffer
             printf("Ungültige Eingabe. Gebe einen char ein.\n");
-            printf("Schreibe Enter, um weiter zu machen...");
-            getchar(); // wartet auf Enter
+            continue;
         }
         // stellt sicher, dass der input buffer leer ist
         while (getchar() != '\n');

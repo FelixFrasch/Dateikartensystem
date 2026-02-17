@@ -7,12 +7,15 @@ int readFromFile(DATEIKARTE **anfang) {
     if (fptr == NULL) return 1;
     deleteList(anfang);
 
-    char line[FLENGTH+ALENGTH];
+    char line[FLENGTH + ALENGTH + 2];
     char frage[FLENGTH];
     char antwort[ALENGTH];
 
+    char format[50];
+    sprintf(format, "%%%d[^;];%%%d[^\n]", FLENGTH - 1, ALENGTH - 1); // Baut z.B. "%99[^;];%99[^\n]" dynamisch aus FLENGTH/ALENGTH
+
     while (fgets(line, sizeof(line), fptr)) {
-        if (sscanf(line, "%99[^;];%99[^\n]",frage, antwort) == 2) {
+        if (sscanf(line, format, frage, antwort) == 2) {
             addElement(anfang, frage, antwort);
         }
     }
@@ -24,6 +27,10 @@ int readFromFile(DATEIKARTE **anfang) {
 void writeToFile(DATEIKARTE *anfang) {
     DATEIKARTE *current = anfang;
     FILE *fptr = fopen("Karteikarten.csv", "w");
+    if (fptr == NULL) {
+        printf("Fehler beim Öffnen der Datei!\n");
+        return;
+    }
 
     while (current != NULL) { // TODO: ID und pointer
         // fprintf(fptr, "%d;", current->id);
