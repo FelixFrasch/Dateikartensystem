@@ -90,11 +90,34 @@ void printList(DATEIKARTE *anfang) {
     printf("--------------------- Ende der Liste ---------------------\n");
 }
 
-void sortList(DATEIKARTE **anfang, int mode) { // 0 = Frage; 1 = ID
-    if (anfang == NULL || *anfang == NULL) return;
 
-    DATEIKARTE *last = getLast(*anfang);
-    quickSortRec(anfang, *anfang, last, mode);
+void sortList(DATEIKARTE **anfang, int mode) { // 0 = Frage; 1 = ID
+    if (anfang == NULL || *anfang == NULL || (*anfang)->next == NULL)
+        return; // Leere Liste oder nur 1 Element
+
+    int swapped;
+    DATEIKARTE *current;
+    DATEIKARTE *last = NULL;
+
+    do {
+        swapped = 0;
+        current = *anfang;
+
+        while (current->next != last) {
+            // Vergleiche current mit current->next
+            if (compareKarten(current, current->next, mode) > 0) {
+                swapKarten(anfang, current, current->next);
+                swapped = 1;
+
+                // Nach swap: current ist jetzt weiter hinten
+                // Wir müssen nicht weitergehen, da current->next jetzt das ist,
+                // was vorher current war
+            } else {
+                current = current->next;
+            }
+        }
+        last = current; // Letztes Element ist jetzt sortiert
+    } while (swapped);
 }
 
 DATEIKARTE* getLast(DATEIKARTE *current) {
@@ -102,37 +125,6 @@ DATEIKARTE* getLast(DATEIKARTE *current) {
         current = current->next; // gehe zum nächsten Element
     }
     return current; // letztes Element
-}
-
-void quickSortRec(DATEIKARTE **head, DATEIKARTE *low, DATEIKARTE *high, int mode) {
-    // obere & untere Grenze NULL, nur 1 Element, kein Element
-    if (!low || !high || low == high || low == high->next) return;
-
-    DATEIKARTE *p = partition(head, low, high, mode);
-
-    if (p && p->prev)
-        quickSortRec(head, low, p->prev, mode);
-    if (p && p->next)
-        quickSortRec(head, p->next, high, mode);
-}
-
-DATEIKARTE* partition(DATEIKARTE **head, DATEIKARTE *low, DATEIKARTE *high, int mode) {
-    DATEIKARTE *pivot = high;
-    DATEIKARTE *i = low->prev;
-
-    for (DATEIKARTE *j = low; j != high; j = j->next) {
-        if (compareKarten(j, pivot, mode) <= 0) {
-            i = (i == NULL) ? low : i->next;
-            if (i != j)
-                swapKarten(head, i, j);
-        }
-    }
-
-    i = (i == NULL) ? low : i->next;
-    if (i != high)
-        swapKarten(head, i, high);
-
-    return i;
 }
 
 int compareKarten(const DATEIKARTE *a, const DATEIKARTE *b, int mode) {
