@@ -135,7 +135,6 @@ void deleteElementFromTerminal(DATEIKARTE **anfang) {
         deleteElement(anfang, id);
 }
 
-// Leeraste ???
 void addElementFromTerminal(DATEIKARTE **anfang) {
         char frage[40];
         char antwort[40];

@@ -8,16 +8,16 @@ DATEIKARTE* addElement(DATEIKARTE** anfang, const char frage[], const char antwo
     if (neu == NULL) return NULL; // Speicher konnte nicht reserviert werden
 
     strncpy(neu->frage, frage, FLENGTH-1); // kopiert max. FLENGTH-1 Zeichen von frage in neu->frage
-    neu->frage[FLENGTH - 1] = '\0'; // setzt letztes Zeichen auf \0 (Stringende), falls frage zu lang war
+    neu->frage[FLENGTH - 1] = '\0'; // setzt letztes Zeichen auf \0 (Stringende)
     strncpy(neu->antwort, antwort, ALENGTH-1);
     neu->antwort[ALENGTH - 1] = '\0';
 
     neu->next = NULL; // kein Nachfolger (wird am Ende eingefügt)
-    neu->prev = NULL; // kein Vorgänger (wird unten gesetzt falls Liste nicht leer)
+    neu->prev = NULL; // kein Vorgänger (wird unten gesetzt, falls Liste nicht leer)
 
     if (*anfang == NULL) { // Liste ist leer, neu wird zum ersten Element
         neu->id = 0;
-        *anfang = neu;   // Doppelpointer: ändert den originalen Pointer des Aufrufers
+        *anfang = neu;   // Zeiger auf Zeiger: ändert den originalen Pointer des Aufrufers
         return *anfang;
     }
 
@@ -68,9 +68,9 @@ void deleteElement(DATEIKARTE **anfang, const int id) {
 void deleteList(DATEIKARTE **anfang) {
     DATEIKARTE *current = *anfang;
     while (*anfang != NULL) { // solange Liste nicht zu Ende
-        current = current->next; // nächstes Element (evtl. NULL)
+        current = current->next; // nächstes Element (ggf. NULL)
         free(*anfang); // Anfang freigegeben
-        *anfang = current; // Anfang aufs nächste gesetzt (evtl. NULL)
+        *anfang = current; // Anfang aufs nächste gesetzt (ggf. NULL)
     }
 }
 
@@ -96,6 +96,7 @@ void sortList(DATEIKARTE **anfang, int mode) { // 0 = Frage; 1 = ID
         return; // Leere Liste oder nur 1 Element
 
     int swapped;
+    // ReSharper disable once CppJoinDeclarationAndAssignment
     DATEIKARTE *current;
     DATEIKARTE *last = NULL;
 
@@ -104,7 +105,7 @@ void sortList(DATEIKARTE **anfang, int mode) { // 0 = Frage; 1 = ID
         current = *anfang;
 
         while (current->next != last) {
-            // Vergleiche current mit current->next
+            // vergleiche current mit current->next
             if (compareKarten(current, current->next, mode) > 0) { // wenn aktuelles Element größer als nächstes Element
                 swapKarten(anfang, current, current->next); // Karten tauschen
                 swapped = 1;
@@ -116,7 +117,7 @@ void sortList(DATEIKARTE **anfang, int mode) { // 0 = Frage; 1 = ID
                 current = current->next;
             }
         }
-        last = current; // Letztes Element ist jetzt sortiert
+        last = current; // letztes Element ist jetzt sortiert
     } while (swapped);
 }
 
@@ -139,13 +140,13 @@ void swapKarten(DATEIKARTE **anfang, DATEIKARTE *a, DATEIKARTE *b) {
 
     // Sicherstellen, dass a vor b in der Liste kommt
     DATEIKARTE *tmp = *anfang;
-    int foundA = 0, foundB = 0;
+    int aFirst = 0; // wird 1, wenn a vor b in der Liste gefunden wird
     while (tmp) {
-        if (tmp == a) { foundA = 1; break; }
-        if (tmp == b) { foundB = 1; break; }
+        if (tmp == a) { aFirst = 1; break; } // a wurde zuerst gefunden
+        if (tmp == b) { break; }              // b wurde zuerst gefunden
         tmp = tmp->next;
     }
-    if (foundB && !foundA) { // Reihenfolge tauschen, so, dass a „früher“ ist
+    if (!aFirst) { // b kommt vor a, also tauschen, damit a immer der frühere Knoten ist
         DATEIKARTE *t = a;
         a = b;
         b = t;
