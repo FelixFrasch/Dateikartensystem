@@ -105,8 +105,8 @@ void sortList(DATEIKARTE **anfang, int mode) { // 0 = Frage; 1 = ID
 
         while (current->next != last) {
             // Vergleiche current mit current->next
-            if (compareKarten(current, current->next, mode) > 0) {
-                swapKarten(anfang, current, current->next);
+            if (compareKarten(current, current->next, mode) > 0) { // wenn aktuelles Element größer als nächstes Element
+                swapKarten(anfang, current, current->next); // Karten tauschen
                 swapped = 1;
 
                 // Nach swap: current ist jetzt weiter hinten
@@ -120,29 +120,18 @@ void sortList(DATEIKARTE **anfang, int mode) { // 0 = Frage; 1 = ID
     } while (swapped);
 }
 
-DATEIKARTE* getLast(DATEIKARTE *current) {
-    while (current && current->next) { // solange es ein nächtest Element gibt // current damit es keinen Fehler bei leerer Liste gibt
-        current = current->next; // gehe zum nächsten Element
-    }
-    return current; // letztes Element
-}
 
-int compareKarten(const DATEIKARTE *a, const DATEIKARTE *b, int mode) {
+int compareKarten(const DATEIKARTE *a, const DATEIKARTE *b, int mode) { // a<b -> -1 // a>b -> 1 // ID gleich -> 0
     if (mode == 0) {
         // zuerst nach Frage sortieren
         int r = strcmp(a->frage, b->frage);
-        if (r < 0) return -1;
-        if (r > 0) return 1;
+        if (r != 0) return r;
         // falls frage gleich, als zweites Kriterium id
-        if (a->id < b->id) return -1;
-        if (a->id > b->id) return 1;
-        return 0;
-    } else {
+    }
         // nur nach id sortieren
         if (a->id < b->id) return -1;
         if (a->id > b->id) return 1;
         return 0;
-    }
 }
 
 void swapKarten(DATEIKARTE **anfang, DATEIKARTE *a, DATEIKARTE *b) {
