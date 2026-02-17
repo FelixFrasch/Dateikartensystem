@@ -4,8 +4,8 @@
 #include "liste.h"
 
 DATEIKARTE* addElement(DATEIKARTE** anfang, const char frage[], const char antwort[]) {
-    DATEIKARTE *neu = malloc(sizeof(DATEIKARTE));
-    if (neu == NULL) return NULL;
+    DATEIKARTE *neu = malloc(sizeof(DATEIKARTE)); // reserviert Speicher für eine neue Karte auf dem Heap
+    if (neu == NULL) return NULL; // Speicher konnte nicht reserviert werden
 
     strncpy(neu->frage, frage, FLENGTH-1); // Maximal FLENGTH-1 Zeichen werden kopiert
     neu->frage[FLENGTH - 1] = '\0'; // Terminiert auch bei zu langem String
@@ -15,9 +15,9 @@ DATEIKARTE* addElement(DATEIKARTE** anfang, const char frage[], const char antwo
     neu->next = NULL;
     neu->prev = NULL;
 
-    if (*anfang == NULL) {
+    if (*anfang == NULL) { // Liste ist leer, neu wird zum ersten Element
         neu->id = 0;
-        *anfang = neu;
+        *anfang = neu;   // Doppelpointer: ändert den originalen Pointer des Aufrufers
         return *anfang;
     }
 
@@ -27,8 +27,8 @@ DATEIKARTE* addElement(DATEIKARTE** anfang, const char frage[], const char antwo
     }
 
     neu->id = karte->id + 1;
-    karte->next = neu;
-    neu->prev = karte;
+    karte->next = neu;  // letztes Element zeigt jetzt auf neu
+    neu->prev = karte;  // neu zeigt zurück auf das bisherige letzte Element
     return neu;
 }
 
@@ -50,7 +50,7 @@ void deleteElement(DATEIKARTE **anfang, const int id) {
         return;
     }
 
-    // Verkettung anpassen
+    // Verkettung anpassen: Vorgänger und Nachfolger direkt verbinden, current wird übersprungen
     if (current->prev)
         current->prev->next = current->next;
 
@@ -124,7 +124,7 @@ void sortList(DATEIKARTE **anfang, int mode) { // 0 = Frage; 1 = ID
 int compareKarten(const DATEIKARTE *a, const DATEIKARTE *b, int mode) { // a<b -> -1 // a>b -> 1 // ID gleich -> 0
     if (mode == 0) {
         // zuerst nach Frage sortieren
-        int r = strcmp(a->frage, b->frage);
+        int r = strcmp(a->frage, b->frage); // strcmp gibt <0, 0, oder >0 zurück (alphabetischer Vergleich)
         if (r != 0) return r;
         // falls frage gleich, als zweites Kriterium id
     }

@@ -95,8 +95,8 @@ void abfrageStarten(DATEIKARTE *anfang) {
                 printf("Frage: %s\n", karte->frage);
 
                 printf("Gebe die Antwort ein: ");
-                fgets(antwort, sizeof(antwort), stdin);
-                antwort[strcspn(antwort, "\n")] = '\0';  // \n entfernen
+                fgets(antwort, sizeof(antwort), stdin); // liest max. sizeof(antwort)-1 Zeichen von der Tastatur
+                antwort[strcspn(antwort, "\n")] = '\0';  // strcspn findet Position von \n, wird mit \0 überschrieben
                 if (strcmp(antwort, "q") == 0) return;
 
                 if (strcmp(antwort, karte->antwort) == 0)
@@ -127,7 +127,7 @@ void deleteElementFromTerminal(DATEIKARTE **anfang) {
                 return;
         }
 
-        if (sscanf(buffer, "%d", &id) != 1) { // sscanf
+        if (sscanf(buffer, "%d", &id) != 1) { // parst eine Ganzzahl aus dem String buffer
                 printf("Das war keine gültige Zahl!\n");
                 return;
         }
@@ -143,8 +143,8 @@ void addElementFromTerminal(DATEIKARTE **anfang) { // TODO: prüfe benötigte an
         printf("---------- Neue Karte wird hinzugefügt ----------\n");
 
         printf("Gebe die Frage an: ");
-        if (fgets(frage, sizeof(frage), stdin) == NULL) return;
-        frage[strcspn(frage, "\n")] = '\0';  // \n entfernen
+        if (fgets(frage, sizeof(frage), stdin) == NULL) return; // liest Eingabe, NULL bei Fehler
+        frage[strcspn(frage, "\n")] = '\0';  // strcspn findet Position von \n, wird mit \0 überschrieben
 
         printf("Gebe die Antwort an: ");
         if (fgets(antwort, sizeof(antwort), stdin) == NULL) return;

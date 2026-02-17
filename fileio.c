@@ -14,8 +14,8 @@ int readFromFile(DATEIKARTE **anfang) {
     char format[50];
     sprintf(format, "%%%d[^;];%%%d[^\n]", FLENGTH - 1, ALENGTH - 1); // Baut z.B. "%99[^;];%99[^\n]" dynamisch aus FLENGTH/ALENGTH
 
-    while (fgets(line, sizeof(line), fptr)) {
-        if (sscanf(line, format, frage, antwort) == 2) {
+    while (fgets(line, sizeof(line), fptr)) { // liest eine Zeile aus der Datei in line
+        if (sscanf(line, format, frage, antwort) == 2) { // parst "frage;antwort" aus line, == 2 prüft ob beide Felder gelesen wurden
             addElement(anfang, frage, antwort);
         }
     }
@@ -34,8 +34,8 @@ void writeToFile(DATEIKARTE *anfang) {
 
     while (current != NULL) { // TODO: ID und pointer
         // fprintf(fptr, "%d;", current->id);
-        fprintf(fptr, "%s;", current->frage);
-        fprintf(fptr, "%s\n", current->antwort);
+        fprintf(fptr, "%s;", current->frage);   // schreibt "frage;" in die Datei
+        fprintf(fptr, "%s\n", current->antwort); // schreibt "antwort\n" in die Datei
         current = current->next;
     }
 
