@@ -89,7 +89,7 @@ void abfrageStarten(DATEIKARTE *anfang) {
 
         while (1)
         {
-                char antwort[40]; // TODO: Eingabe länge prüfung
+                char antwort[40];
                 printf("\n");
                 printf("---------- Abfrage beginnt ----------\n");
                 printf("Frage: %s\n", karte->frage);
@@ -136,9 +136,9 @@ void deleteElementFromTerminal(DATEIKARTE **anfang) {
 }
 
 // Leeraste ???
-void addElementFromTerminal(DATEIKARTE **anfang) { // TODO: prüfe benötigte anzahl 50 / 50+1  und eingabe prüfung auf anzahl
-        char frage[40]; // TODO: Muss speicher dafür freigelegt werden?
-        char antwort[40]; // TODO: Eingabe länge prüfung
+void addElementFromTerminal(DATEIKARTE **anfang) {
+        char frage[40];
+        char antwort[40];
         printf("\n");
         printf("---------- Neue Karte wird hinzugefügt ----------\n");
 

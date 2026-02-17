@@ -3,7 +3,7 @@
 #include "fileio.h"
 
 int readFromFile(DATEIKARTE **anfang) {
-    FILE *fptr = fopen("Karteikarten.csv", "r"); // öffnet die Datei zum Lesen ("r" = read), gibt NULL zurück falls Datei nicht existiert
+    FILE *fptr = fopen("Karteikarten.csv", "r"); // öffnet die Datei zum Lesen ("r" = read), gibt NULL zurück, falls Datei nicht existiert
     if (fptr == NULL) return 1;
     deleteList(anfang); // alte Liste löschen bevor neue Daten geladen werden
 
@@ -15,7 +15,7 @@ int readFromFile(DATEIKARTE **anfang) {
     sprintf(format, "%%%d[^;];%%%d[^\n]", FLENGTH - 1, ALENGTH - 1); // Baut z.B. "%99[^;];%99[^\n]" dynamisch aus FLENGTH/ALENGTH
 
     while (fgets(line, sizeof(line), fptr)) { // liest eine Zeile aus der Datei in line
-        if (sscanf(line, format, frage, antwort) == 2) { // parst "frage;antwort" aus line, == 2 prüft ob beide Felder gelesen wurden
+        if (sscanf(line, format, frage, antwort) == 2) { // parst "frage;antwort" aus line, == 2 prüft, ob beide Felder gelesen wurden
             addElement(anfang, frage, antwort);
         }
     }
@@ -32,8 +32,7 @@ void writeToFile(DATEIKARTE *anfang) {
         return;
     }
 
-    while (current != NULL) { // TODO: ID und pointer
-        // fprintf(fptr, "%d;", current->id);
+    while (current != NULL) {
         fprintf(fptr, "%s;", current->frage);   // schreibt "frage;" in die Datei
         fprintf(fptr, "%s\n", current->antwort); // schreibt "antwort\n" in die Datei
         current = current->next; // current-> greift auf das Feld des Structs zu, auf den der Pointer zeigt
