@@ -3,9 +3,9 @@
 #include "fileio.h"
 
 int readFromFile(DATEIKARTE **anfang) {
-    FILE *fptr = fopen("Karteikarten.csv", "r");
+    FILE *fptr = fopen("Karteikarten.csv", "r"); // öffnet die Datei zum Lesen ("r" = read), gibt NULL zurück falls Datei nicht existiert
     if (fptr == NULL) return 1;
-    deleteList(anfang);
+    deleteList(anfang); // alte Liste löschen bevor neue Daten geladen werden
 
     char line[FLENGTH + ALENGTH + 2];
     char frage[FLENGTH];
@@ -20,13 +20,13 @@ int readFromFile(DATEIKARTE **anfang) {
         }
     }
 
-    fclose(fptr);
+    fclose(fptr); // Datei schließen, gibt den Datei-Handle frei
     return 0;
 }
 
 void writeToFile(DATEIKARTE *anfang) {
     DATEIKARTE *current = anfang;
-    FILE *fptr = fopen("Karteikarten.csv", "w");
+    FILE *fptr = fopen("Karteikarten.csv", "w"); // öffnet Datei zum Schreiben ("w" = write), erstellt sie neu falls sie existiert
     if (fptr == NULL) {
         printf("Fehler beim Öffnen der Datei!\n");
         return;
@@ -36,13 +36,13 @@ void writeToFile(DATEIKARTE *anfang) {
         // fprintf(fptr, "%d;", current->id);
         fprintf(fptr, "%s;", current->frage);   // schreibt "frage;" in die Datei
         fprintf(fptr, "%s\n", current->antwort); // schreibt "antwort\n" in die Datei
-        current = current->next;
+        current = current->next; // current-> greift auf das Feld des Structs zu, auf den der Pointer zeigt
     }
 
-    fclose(fptr);
+    fclose(fptr); // Datei schließen
 }
 
 void deleteFile()
 {
-    remove("Karteikarten.csv");
+    remove("Karteikarten.csv"); // löscht die Datei vom Dateisystem
 }

@@ -7,13 +7,13 @@ DATEIKARTE* addElement(DATEIKARTE** anfang, const char frage[], const char antwo
     DATEIKARTE *neu = malloc(sizeof(DATEIKARTE)); // reserviert Speicher für eine neue Karte auf dem Heap
     if (neu == NULL) return NULL; // Speicher konnte nicht reserviert werden
 
-    strncpy(neu->frage, frage, FLENGTH-1); // Maximal FLENGTH-1 Zeichen werden kopiert
-    neu->frage[FLENGTH - 1] = '\0'; // Terminiert auch bei zu langem String
+    strncpy(neu->frage, frage, FLENGTH-1); // kopiert max. FLENGTH-1 Zeichen von frage in neu->frage
+    neu->frage[FLENGTH - 1] = '\0'; // setzt letztes Zeichen auf \0 (Stringende), falls frage zu lang war
     strncpy(neu->antwort, antwort, ALENGTH-1);
     neu->antwort[ALENGTH - 1] = '\0';
 
-    neu->next = NULL;
-    neu->prev = NULL;
+    neu->next = NULL; // kein Nachfolger (wird am Ende eingefügt)
+    neu->prev = NULL; // kein Vorgänger (wird unten gesetzt falls Liste nicht leer)
 
     if (*anfang == NULL) { // Liste ist leer, neu wird zum ersten Element
         neu->id = 0;
@@ -21,8 +21,8 @@ DATEIKARTE* addElement(DATEIKARTE** anfang, const char frage[], const char antwo
         return *anfang;
     }
 
-    DATEIKARTE *karte = *anfang;
-    while (karte->next != NULL) {
+    DATEIKARTE *karte = *anfang; // startet beim ersten Element
+    while (karte->next != NULL) { // wandert bis zum letzten Element (next == NULL)
         karte = karte->next;
     }
 
@@ -40,7 +40,7 @@ void deleteElement(DATEIKARTE **anfang, const int id) {
 
     DATEIKARTE *current = *anfang;   // Pointer auf den aktuellen Zeiger
 
-    // Suche Element
+    // Suche Element: durchläuft die Liste bis id gefunden oder Ende erreicht (NULL)
     while (current && current->id != id)
         current = current->next;
 
@@ -51,17 +51,17 @@ void deleteElement(DATEIKARTE **anfang, const int id) {
     }
 
     // Verkettung anpassen: Vorgänger und Nachfolger direkt verbinden, current wird übersprungen
-    if (current->prev)
-        current->prev->next = current->next;
+    if (current->prev)                      // falls es einen Vorgänger gibt
+        current->prev->next = current->next; // Vorgänger zeigt jetzt auf Nachfolger (überspringt current)
 
-    if (current->next)
-        current->next->prev = current->prev;
+    if (current->next)                      // falls es einen Nachfolger gibt
+        current->next->prev = current->prev; // Nachfolger zeigt jetzt zurück auf Vorgänger
 
     // Anfang-Pointer anpassen
     if (*anfang == current)
         *anfang = current->next;
 
-    free(current);
+    free(current); // gibt den Heap-Speicher des gelöschten Elements frei
     printf("Element mit ID %d gelöscht.\n", id);
 }
 
@@ -156,19 +156,16 @@ void swapKarten(DATEIKARTE **anfang, DATEIKARTE *a, DATEIKARTE *b) {
     DATEIKARTE *prevB = b->prev;
     DATEIKARTE *nextB = b->next;
 
-    // Falls a direkt vor b steht: a <-> b <-> ...
+    // Falls a direkt vor b steht: vorher [prevA] <-> [a] <-> [b] <-> [nextB], nachher [prevA] <-> [b] <-> [a] <-> [nextB]
     if (nextA == b) {
-        // a.prev -> b
-        if (prevA) prevA->next = b;
-        b->prev = prevA;
+        if (prevA) prevA->next = b; // prevA zeigt jetzt auf b statt auf a
+        b->prev = prevA;            // b zeigt zurück auf prevA statt auf a
 
-        // b.next bleibt nextB
-        if (nextB) nextB->prev = a;
-        a->next = nextB;
+        if (nextB) nextB->prev = a; // nextB zeigt zurück auf a statt auf b
+        a->next = nextB;            // a zeigt jetzt auf nextB statt auf b
 
-        // b <-> a
-        b->next = a;
-        a->prev = b;
+        b->next = a;                // b zeigt jetzt auf a (b ist jetzt vorne)
+        a->prev = b;                // a zeigt zurück auf b (a ist jetzt hinten)
     }
     // Falls b direkt vor a steht: b <-> a <-> ...
     else if (nextB == a) {
@@ -179,15 +176,15 @@ void swapKarten(DATEIKARTE **anfang, DATEIKARTE *a, DATEIKARTE *b) {
     } else {
         // Knoten sind nicht benachbart
 
-        // Nachbarn von a umhängen
+        // Nachbarn von a zeigen jetzt auf b (b nimmt a's Platz ein)
         if (prevA) prevA->next = b;
         if (nextA) nextA->prev = b;
 
-        // Nachbarn von b umhängen
+        // Nachbarn von b zeigen jetzt auf a (a nimmt b's Platz ein)
         if (prevB) prevB->next = a;
         if (nextB) nextB->prev = a;
 
-        // a und b gegenseitig ihre prev/next tauschen
+        // a bekommt b's alte Nachbarn, b bekommt a's alte Nachbarn
         a->prev = prevB;
         a->next = nextB;
 

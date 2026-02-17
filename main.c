@@ -16,7 +16,7 @@ int main(void) {
     char userInput = 0;
     clearTerminal(40);
     printInfo();
-    DATEIKARTE *dateikarte = NULL;
+    DATEIKARTE *dateikarte = NULL; // Pointer auf das erste Element der Liste, NULL = leere Liste
 
     while (1) {
 
@@ -25,7 +25,7 @@ int main(void) {
         printf("Auswahl: ");
         if (scanf(" %c", &userInput) != 1) { // Leerzeichen vor %c überspringt Whitespace (z.B. vorheriges \n)
             // wenn scanf fehlschlägt
-            while (getchar() != '\n'); // leert Buffer
+            while (getchar() != '\n'); // liest alle Zeichen bis zum Zeilenende, um den Eingabepuffer zu leeren
             printf("Ungültige Eingabe. Gebe einen char ein.\n");
             continue;
         }
@@ -97,7 +97,7 @@ void abfrageStarten(DATEIKARTE *anfang) {
                 printf("Gebe die Antwort ein: ");
                 fgets(antwort, sizeof(antwort), stdin); // liest max. sizeof(antwort)-1 Zeichen von der Tastatur
                 antwort[strcspn(antwort, "\n")] = '\0';  // strcspn findet Position von \n, wird mit \0 überschrieben
-                if (strcmp(antwort, "q") == 0) return;
+                if (strcmp(antwort, "q") == 0) return; // strcmp gibt 0 zurück wenn beide Strings identisch sind
 
                 if (strcmp(antwort, karte->antwort) == 0)
                 {
@@ -122,12 +122,12 @@ void deleteElementFromTerminal(DATEIKARTE **anfang) {
         printf("\n---------- Karte wird entfernt ----------\n");
         printf("Gebe die Id an: ");
 
-        if (fgets(buffer, sizeof(buffer), stdin) == NULL) {
+        if (fgets(buffer, sizeof(buffer), stdin) == NULL) { // fgets liest eine Zeile, gibt NULL bei Fehler/EOF zurück
                 printf("Fehler beim Lesen.\n");
                 return;
         }
 
-        if (sscanf(buffer, "%d", &id) != 1) { // parst eine Ganzzahl aus dem String buffer
+        if (sscanf(buffer, "%d", &id) != 1) { // sscanf liest aus einem String statt aus stdin, %d parst eine Ganzzahl, gibt Anzahl gelesener Felder zurück
                 printf("Das war keine gültige Zahl!\n");
                 return;
         }
