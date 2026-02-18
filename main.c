@@ -89,7 +89,7 @@ void abfrageStarten(DATEIKARTE *anfang) {
 
         while (1)
         {
-                char antwort[40];
+                char antwort[ALENGTH];
                 printf("\n");
                 printf("---------- Abfrage beginnt ----------\n");
                 printf("Frage: %s\n", karte->frage);
@@ -136,17 +136,27 @@ void deleteElementFromTerminal(DATEIKARTE **anfang) {
 }
 
 void addElementFromTerminal(DATEIKARTE **anfang) {
-        char frage[40];
-        char antwort[40];
+        char frage[FLENGTH];
+        char antwort[ALENGTH];
         printf("\n");
         printf("---------- Neue Karte wird hinzugefügt ----------\n");
 
         printf("Gebe die Frage an: ");
         if (fgets(frage, sizeof(frage), stdin) == NULL) return; // liest Eingabe, NULL bei Fehler
+        if (strchr(frage, '\n') == NULL) { // kein \n -> Buffer voll -> Eingabe zu lang
+            while (getchar() != '\n') {} // Eingabepuffer leeren
+            printf("Eingabe zu lang! Maximal %d Zeichen erlaubt.\n", FLENGTH - 1);
+            return;
+        }
         frage[strcspn(frage, "\n")] = '\0';  // strcspn findet Position von \n, wird mit \0 überschrieben
 
         printf("Gebe die Antwort an: ");
         if (fgets(antwort, sizeof(antwort), stdin) == NULL) return;
+        if (strchr(antwort, '\n') == NULL) { // kein \n -> Buffer voll -> Eingabe zu lang
+            while (getchar() != '\n') {} // Eingabepuffer leeren
+            printf("Eingabe zu lang! Maximal %d Zeichen erlaubt.\n", ALENGTH - 1);
+            return;
+        }
         antwort[strcspn(antwort, "\n")] = '\0';
 
         addElement(anfang, frage, antwort);
