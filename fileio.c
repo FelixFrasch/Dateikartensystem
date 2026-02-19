@@ -2,8 +2,8 @@
 #include <string.h>
 #include "fileio.h"
 
-int readFromFile(DATEIKARTE **anfang) {
-    FILE *fptr = fopen("Karteikarten.csv", "r"); // öffnet die Datei zum Lesen ("r" = read), gibt NULL zurück, falls Datei nicht existiert
+int readFromFile(DATEIKARTE **anfang, const char *dateiname) {
+    FILE *fptr = fopen(dateiname, "r"); // öffnet Datei zum Lesen, gibt NULL zurück falls nicht vorhanden
     if (fptr == NULL) return 1;
     deleteList(anfang); // alte Liste löschen bevor neue Daten geladen werden
 
@@ -12,36 +12,32 @@ int readFromFile(DATEIKARTE **anfang) {
     char antwort[ALENGTH];
 
     char format[50];
-    sprintf(format, "%%%d[^;];%%%d[^\n]", FLENGTH - 1, ALENGTH - 1); // Baut z.B. "%99[^;];%99[^\n]" dynamisch aus FLENGTH/ALENGTH
+    sprintf(format, "%%%d[^;];%%%d[^\n]", FLENGTH - 1, ALENGTH - 1); // z.B. "%99[^;];%99[^\n]"
 
-    while (fgets(line, sizeof(line), fptr)) { // liest eine Zeile aus der Datei in line
-        if (sscanf(line, format, frage, antwort) == 2) { // parst "frage;antwort" aus line, == 2 prüft, ob beide Felder gelesen wurden
+    while (fgets(line, sizeof(line), fptr)) { // liest eine Zeile (leere Datei: Schleife wird nie betreten)
+        if (sscanf(line, format, frage, antwort) == 2) { // == 2: beide Felder erfolgreich gelesen
             addElement(anfang, frage, antwort);
         }
     }
 
-    fclose(fptr); // Datei schließen, gibt den Datei-Handle frei
+    fclose(fptr);
     return 0;
 }
 
-void writeToFile(DATEIKARTE *anfang) {
+int writeToFile(DATEIKARTE *anfang, const char *dateiname) {
+    FILE *fptr = fopen(dateiname, "w"); // "w" erstellt die Datei neu oder überschreibt sie
+    if (fptr == NULL) return 1;
+
     DATEIKARTE *current = anfang;
-    FILE *fptr = fopen("Karteikarten.csv", "w"); // öffnet Datei zum Schreiben ("w" = write), erstellt sie neu falls sie existiert
-    if (fptr == NULL) {
-        printf("Fehler beim Öffnen der Datei!\n");
-        return;
-    }
-
     while (current != NULL) {
-        fprintf(fptr, "%s;", current->frage);   // schreibt "frage;" in die Datei
-        fprintf(fptr, "%s\n", current->antwort); // schreibt "antwort\n" in die Datei
-        current = current->next; // current-> greift auf das Feld des Structs zu, auf den der Pointer zeigt
+        fprintf(fptr, "%s;%s\n", current->inhalt->frage, current->inhalt->antwort);
+        current = current->next;
     }
 
-    fclose(fptr); // Datei schließen
+    fclose(fptr);
+    return 0;
 }
 
-void deleteFile()
-{
-    remove("Karteikarten.csv"); // löscht die Datei vom Dateisystem
+int deleteFile(const char *dateiname) {
+    return remove(dateiname) == 0 ? 0 : 1; // remove gibt 0 bei Erfolg zurück
 }

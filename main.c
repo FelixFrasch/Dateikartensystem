@@ -1,11 +1,12 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "config.h"
 #include "liste.h"
 #include "fileio.h"
+#include "abfrage.h"
 
 void readFromFileTerminal(DATEIKARTE **anfang);
-void abfrageStarten(DATEIKARTE *anfang);
 void deleteElementFromTerminal(DATEIKARTE **anfang);
 void addElementFromTerminal(DATEIKARTE **anfang);
 void printInfo();
@@ -24,14 +25,11 @@ int main(void) {
         printInfo();
         printf("Auswahl: ");
         if (scanf(" %c", &userInput) != 1) { // Leerzeichen vor %c überspringt Whitespace (z.B. vorheriges \n)
-            // wenn scanf fehlschlägt
-            while (getchar() != '\n'){} // liest alle Zeichen bis zum Zeilenende, um den Eingabepuffer zu leeren
+            while (getchar() != '\n') {} // Eingabepuffer leeren
             printf("Ungültige Eingabe. Gebe einen char ein.\n");
             continue;
         }
-        // stellt sicher, dass der input buffer leer ist
-        while (getchar() != '\n'){}
-
+        while (getchar() != '\n') {} // stellt sicher, dass der Eingabepuffer leer ist
 
         if (userInput)
             switch (userInput) {
@@ -49,141 +47,113 @@ int main(void) {
                 break;
         case 's': sortList(&dateikarte, 1); // nach ID sortieren
                 break;
-        case 'w': writeToFile(dateikarte); // in Datei schreiben
+        case 'w': // in Datei schreiben
+                if (writeToFile(dateikarte, DATEINAME) == 0)
+                    printf("Erfolgreich gespeichert.\n");
+                else
+                    printf("Fehler beim Schreiben der Datei!\n");
                 break;
         case 'r': readFromFileTerminal(&dateikarte); // aus Datei lesen
                 break;
-        case 'd': deleteFile(); // Datei löschen
+        case 'd': // Datei löschen
+                if (deleteFile(DATEINAME) == 0)
+                    printf("Datei gelöscht.\n");
+                else
+                    printf("Fehler beim Löschen der Datei!\n");
                 break;
-        case 'a': abfrageStarten(dateikarte); // abfrage Starten
+        case 'a': abfrageStarten(dateikarte); // Abfrage starten
                 break;
         default: printf("Ungültige Eingabe.\n");
                 break;
             }
         printf("Drücke Enter, um weiter zu machen...");
-        getchar(); // wartet, bis ein char erkannt wird (Enter)
+        getchar(); // wartet auf Enter
 
     }
 }
 
 void readFromFileTerminal(DATEIKARTE **anfang) {
-        // Hilfsfunktion, die zwischen Terminal und readFromFile steht
-        // zuständig, für korrekte interpretation von Rückgabewerten
-        int code = readFromFile(anfang);
-        switch (code)
-        {
-        case 0: printf("Karteikarten erfolgreich geladen.\n");
-                break;
-        case 1: printf("Datei nicht gefunden!\n");
-                break;
-        default: printf("Unbekannter Rückgabewert!\n");
-        }
-}
-
-void abfrageStarten(DATEIKARTE *anfang) {
-        DATEIKARTE *karte = anfang;
-        if (anfang == NULL) {
-                printf("Liste ist leer.\n");
-                return;
-        }
-
-        printf("---------- Abfrage beginnt ----------\n");
-        while (1)
-        {
-                char antwort[ALENGTH];
-                printf("\n");
-
-                printf("Frage: %s\n", karte->frage);
-
-                printf("Gebe die Antwort ein: ");
-                fgets(antwort, sizeof(antwort), stdin); // liest max. sizeof(antwort)-1 Zeichen von der Tastatur
-                antwort[strcspn(antwort, "\n")] = '\0';  // findet Position von \n, wird mit \0 überschrieben
-                if (strcmp(antwort, "q") == 0) return; // strcmp gibt 0 zurück, wenn beide Strings identisch sind
-
-                if (strcmp(antwort, karte->antwort) == 0)
-                {
-                        printf("Richtig!\n");
-                } else
-                {
-                        printf("Falsch!\n");
-                        printf("Erwartet: %s\n", karte->antwort);
-                }
-
-                if (karte->next == NULL) break;
-                karte = karte->next;
-
-        }
-        printf("\n---------- Abfrage beendet ----------\n\n");
-
+    // Hilfsfunktion, die Rückgabecodes von readFromFile in Texte übersetzt
+    int code = readFromFile(anfang, DATEINAME);
+    switch (code) {
+    case 0: printf("Karteikarten erfolgreich geladen.\n");
+            break;
+    case 1: printf("Datei nicht gefunden!\n");
+            break;
+    default: printf("Unbekannter Rückgabewert!\n");
+    }
 }
 
 void deleteElementFromTerminal(DATEIKARTE **anfang) {
-        int id;
-        char buffer[100];
+    int id;
+    char buffer[100];
 
-        printf("\n---------- Karte wird entfernt ----------\n");
-        printf("Gebe die Id an: ");
+    printf("\n---------- Karte wird entfernt ----------\n");
+    printf("Gebe die Id an: ");
 
-        if (fgets(buffer, sizeof(buffer), stdin) == NULL) { // fgets liest eine Zeile, gibt NULL bei Fehler/EOF zurück
-                printf("Fehler beim Lesen.\n");
-                return;
-        }
+    if (fgets(buffer, sizeof(buffer), stdin) == NULL) { // fgets gibt NULL bei Fehler/EOF zurück
+        printf("Fehler beim Lesen.\n");
+        return;
+    }
 
-        if (sscanf(buffer, "%d", &id) != 1) { // sscanf liest aus einem String statt aus stdin, %d parst eine Ganzzahl, gibt Anzahl gelesener Felder zurück
-                printf("Das war keine gültige Zahl!\n");
-                return;
-        }
+    if (sscanf(buffer, "%d", &id) != 1) { // sscanf liest aus String, gibt Anzahl gelesener Felder zurück
+        printf("Das war keine gültige Zahl!\n");
+        return;
+    }
 
-        deleteElement(anfang, id);
+    int code = deleteElement(anfang, id);
+    switch (code) {
+    case 0: printf("Element mit ID %d gelöscht.\n", id); break;
+    case 1: printf("Die Liste ist leer!\n"); break;
+    case 2: printf("Element mit ID %d nicht gefunden!\n", id); break;
+    default: printf("Unbekannter Fehler.\n"); break;
+    }
 }
 
 void addElementFromTerminal(DATEIKARTE **anfang) {
-        char frage[FLENGTH];
-        char antwort[ALENGTH];
-        printf("\n");
-        printf("---------- Neue Karte wird hinzugefügt ----------\n");
+    char frage[FLENGTH];
+    char antwort[ALENGTH];
+    printf("\n");
+    printf("---------- Neue Karte wird hinzugefügt ----------\n");
 
-        printf("Gebe die Frage an: ");
-        if (fgets(frage, sizeof(frage), stdin) == NULL) return; // liest Eingabe, NULL bei Fehler
-        if (strchr(frage, '\n') == NULL) { // kein \n -> Buffer voll -> Eingabe zu lang
-            while (getchar() != '\n') {} // Eingabepuffer leeren
-            printf("Eingabe zu lang! Maximal %d Zeichen erlaubt.\n", FLENGTH - 1);
-            return;
-        }
-        frage[strcspn(frage, "\n")] = '\0';  // strcspn findet Position von \n, wird mit \0 überschrieben
+    printf("Gebe die Frage an: ");
+    if (fgets(frage, sizeof(frage), stdin) == NULL) return;
+    if (strchr(frage, '\n') == NULL) { // kein \n -> Buffer voll -> Eingabe zu lang
+        while (getchar() != '\n') {} // Eingabepuffer leeren
+        printf("Eingabe zu lang! Maximal %d Zeichen erlaubt.\n", FLENGTH - 1);
+        return;
+    }
+    frage[strcspn(frage, "\n")] = '\0'; // strcspn findet Position von \n, wird mit \0 überschrieben
 
-        printf("Gebe die Antwort an: ");
-        if (fgets(antwort, sizeof(antwort), stdin) == NULL) return;
-        if (strchr(antwort, '\n') == NULL) { // kein \n -> Buffer voll -> Eingabe zu lang
-            while (getchar() != '\n') {} // Eingabepuffer leeren
-            printf("Eingabe zu lang! Maximal %d Zeichen erlaubt.\n", ALENGTH - 1);
-            return;
-        }
-        antwort[strcspn(antwort, "\n")] = '\0';
+    printf("Gebe die Antwort an: ");
+    if (fgets(antwort, sizeof(antwort), stdin) == NULL) return;
+    if (strchr(antwort, '\n') == NULL) {
+        while (getchar() != '\n') {}
+        printf("Eingabe zu lang! Maximal %d Zeichen erlaubt.\n", ALENGTH - 1);
+        return;
+    }
+    antwort[strcspn(antwort, "\n")] = '\0';
 
-        addElement(anfang, frage, antwort);
-
+    addElement(anfang, frage, antwort);
 }
 
 void printInfo() {
-        static char a [] = "---------- Dateikartensystem von Felix Frasch ----------\n"
-                           "Schreibe 1, um ein Element zur Liste hinzu zu fügen.\n"
-                           "Schreibe 2, um die Liste auszugeben.\n"
-                           "Schreibe 3, um ein beliebiges Element aus der Liste zu löschen.\n"
-                           "Schreibe 4, um die Liste zu löschen.\n"
-                           "Schreibe 5, um nach Frage zu sortieren.\n"
-                           "Schreibe s, um nach ID zu sortieren.\n"
-                           "Schreibe w, um die Karteikarten zu speichern.\n"
-                           "Schreibe r, um Karteikarten aus dem Speicher zu laden.\n"
-                           "Schreibe d, um die Datei zu löchen.\n"
-                           "Schreibe a, um die Abfrage zu starten.\n"
-                           "Schreibe q, um abzubrechen.\n";
-        printf("%s", a);
+    static char a[] = "---------- Dateikartensystem von Felix Frasch ----------\n"
+                      "Schreibe 1, um ein Element zur Liste hinzu zu fügen.\n"
+                      "Schreibe 2, um die Liste auszugeben.\n"
+                      "Schreibe 3, um ein beliebiges Element aus der Liste zu löschen.\n"
+                      "Schreibe 4, um die Liste zu löschen.\n"
+                      "Schreibe 5, um nach Frage zu sortieren.\n"
+                      "Schreibe s, um nach ID zu sortieren.\n"
+                      "Schreibe w, um die Karteikarten zu speichern.\n"
+                      "Schreibe r, um Karteikarten aus dem Speicher zu laden.\n"
+                      "Schreibe d, um die Datei zu löschen.\n"
+                      "Schreibe a, um die Abfrage zu starten.\n"
+                      "Schreibe q, um abzubrechen.\n";
+    printf("%s", a);
 }
 
 void clearTerminal(const int count) {
-        for (int i = 0; i < count; ++i) {
-                printf("\n");
-        }
-
+    for (int i = 0; i < count; ++i)
+        printf("\n");
 }
