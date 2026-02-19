@@ -72,7 +72,7 @@ void readFromFileTerminal(DATEIKARTE **anfang) {
         int code = readFromFile(anfang);
         switch (code)
         {
-        case 0: printf("Karteikarten erfolgreich aus Datei überschrieben.\n");
+        case 0: printf("Karteikarten erfolgreich geladen.\n");
                 break;
         case 1: printf("Datei nicht gefunden!\n");
                 break;
@@ -174,7 +174,7 @@ void printInfo() {
                            "Schreibe 5, um nach Frage zu sortieren.\n"
                            "Schreibe s, um nach ID zu sortieren.\n"
                            "Schreibe w, um die Karteikarten zu speichern.\n"
-                           "Schreibe r, um eine Datei auszulesen und den Inhalt der List anzuhängen.\n"
+                           "Schreibe r, um Karteikarten aus dem Speicher zu laden.\n"
                            "Schreibe d, um die Datei zu löchen.\n"
                            "Schreibe a, um die Abfrage zu starten.\n"
                            "Schreibe q, um abzubrechen.\n";
