@@ -3,13 +3,13 @@
 
 #include "liste.h"
 
-// Liest Karteikarten aus "Karteikarten.csv" und ersetzt die aktuelle Liste. Gibt 0 bei Erfolg, 1 bei Fehler zurueck.
+// Liest Karteikarten aus "Karteikarten.csv" und ersetzt die aktuelle Liste. Gibt 0 bei Erfolg, 1 bei Fehler zurück.
 int readFromFile(DATEIKARTE **anfang);
 
 // Schreibt alle Karteikarten der Liste im Format "frage;antwort" in "Karteikarten.csv".
 void writeToFile(DATEIKARTE *anfang);
 
-// Loescht die Datei "Karteikarten.csv" vom Dateisystem.
+// Löscht die Datei "Karteikarten.csv" vom Dateisystem.
 void deleteFile();
 
 #endif //TESTATAUFGABE_FELIXFRASCH_1_0_FILEIO_H

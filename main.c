@@ -25,12 +25,12 @@ int main(void) {
         printf("Auswahl: ");
         if (scanf(" %c", &userInput) != 1) { // Leerzeichen vor %c überspringt Whitespace (z.B. vorheriges \n)
             // wenn scanf fehlschlägt
-            while (getchar() != '\n'); // liest alle Zeichen bis zum Zeilenende, um den Eingabepuffer zu leeren
+            while (getchar() != '\n'){} // liest alle Zeichen bis zum Zeilenende, um den Eingabepuffer zu leeren
             printf("Ungültige Eingabe. Gebe einen char ein.\n");
             continue;
         }
         // stellt sicher, dass der input buffer leer ist
-        while (getchar() != '\n');
+        while (getchar() != '\n'){}
 
 
         if (userInput)
@@ -68,7 +68,7 @@ int main(void) {
 
 void readFromFileTerminal(DATEIKARTE **anfang) {
         // Hilfsfunktion, die zwischen Terminal und readFromFile steht
-        // Zuständig, für korrekte interpretation von Rückgabewerten
+        // zuständig, für korrekte interpretation von Rückgabewerten
         int code = readFromFile(anfang);
         switch (code)
         {
@@ -87,17 +87,18 @@ void abfrageStarten(DATEIKARTE *anfang) {
                 return;
         }
 
+        printf("---------- Abfrage beginnt ----------\n");
         while (1)
         {
                 char antwort[ALENGTH];
                 printf("\n");
-                printf("---------- Abfrage beginnt ----------\n");
+
                 printf("Frage: %s\n", karte->frage);
 
                 printf("Gebe die Antwort ein: ");
                 fgets(antwort, sizeof(antwort), stdin); // liest max. sizeof(antwort)-1 Zeichen von der Tastatur
-                antwort[strcspn(antwort, "\n")] = '\0';  // strcspn findet Position von \n, wird mit \0 überschrieben
-                if (strcmp(antwort, "q") == 0) return; // strcmp gibt 0 zurück wenn beide Strings identisch sind
+                antwort[strcspn(antwort, "\n")] = '\0';  // findet Position von \n, wird mit \0 überschrieben
+                if (strcmp(antwort, "q") == 0) return; // strcmp gibt 0 zurück, wenn beide Strings identisch sind
 
                 if (strcmp(antwort, karte->antwort) == 0)
                 {
@@ -108,10 +109,11 @@ void abfrageStarten(DATEIKARTE *anfang) {
                         printf("Erwartet: %s\n", karte->antwort);
                 }
 
-                if (karte->next == NULL) return;
+                if (karte->next == NULL) break;
                 karte = karte->next;
 
         }
+        printf("\n---------- Abfrage beendet ----------\n\n");
 
 }
 
