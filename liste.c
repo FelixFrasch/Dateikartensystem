@@ -16,12 +16,12 @@ static int strcmpIgnoreCase(const char *a, const char *b) {
     return tolower((unsigned char)*a) - tolower((unsigned char)*b);
 }
 
-DATEIKARTE *addElement(DATEIKARTE **anfang, const char frage[], const char antwort[]) {
+FEHLERCODE addElement(DATEIKARTE **anfang, const char frage[], const char antwort[]) {
     DATEIKARTE *neu = malloc(sizeof(DATEIKARTE)); // reserviert Speicher für einen neuen Listenknoten
-    if (neu == NULL) return NULL;
+    if (neu == NULL) return FEHLER_SPEICHER;
 
     KARTENINHALT *inhalt = malloc(sizeof(KARTENINHALT)); // reserviert Speicher für den Inhalt
-    if (inhalt == NULL) { free(neu); return NULL; }
+    if (inhalt == NULL) { free(neu); return FEHLER_SPEICHER; }
 
     strncpy(inhalt->frage, frage, FLENGTH - 1);
     inhalt->frage[FLENGTH - 1] = '\0';
@@ -35,7 +35,7 @@ DATEIKARTE *addElement(DATEIKARTE **anfang, const char frage[], const char antwo
     if (*anfang == NULL) { // Liste ist leer, neu wird erstes Element
         inhalt->id = 0;
         *anfang = neu;
-        return *anfang;
+        return OK;
     }
 
     DATEIKARTE *karte = *anfang;
@@ -45,19 +45,19 @@ DATEIKARTE *addElement(DATEIKARTE **anfang, const char frage[], const char antwo
     inhalt->id = karte->inhalt->id + 1;
     karte->next = neu;  // letztes Element zeigt jetzt auf neu
     neu->prev = karte;  // neu zeigt zurück auf das bisherige letzte Element
-    return neu;
+    return OK;
 }
 
-int deleteElement(DATEIKARTE **anfang, int id) {
+FEHLERCODE deleteElement(DATEIKARTE **anfang, int id) {
     if (*anfang == NULL)
-        return 1; // Liste leer
+        return FEHLER_LISTE_LEER;
 
     DATEIKARTE *current = *anfang;
     while (current && current->inhalt->id != id)
         current = current->next;
 
     if (current == NULL)
-        return 2; // nicht gefunden
+        return FEHLER_NICHT_GEFUNDEN;
 
     if (current->prev)
         current->prev->next = current->next;
@@ -68,7 +68,7 @@ int deleteElement(DATEIKARTE **anfang, int id) {
 
     free(current->inhalt); // Inhalt freigeben
     free(current);         // Knoten freigeben
-    return 0; // OK
+    return OK;
 }
 
 void deleteList(DATEIKARTE **anfang) {

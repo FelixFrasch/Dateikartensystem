@@ -2,9 +2,9 @@
 #include <string.h>
 #include "fileio.h"
 
-int readFromFile(DATEIKARTE **anfang, const char *dateiname) {
+FEHLERCODE readFromFile(DATEIKARTE **anfang, const char *dateiname) {
     FILE *fptr = fopen(dateiname, "r"); // öffnet Datei zum Lesen, gibt NULL zurück falls nicht vorhanden
-    if (fptr == NULL) return 1;
+    if (fptr == NULL) return FEHLER_DATEI;
     deleteList(anfang); // alte Liste löschen bevor neue Daten geladen werden
 
     char line[FLENGTH + ALENGTH + 2];
@@ -16,17 +16,20 @@ int readFromFile(DATEIKARTE **anfang, const char *dateiname) {
 
     while (fgets(line, sizeof(line), fptr)) { // liest eine Zeile (leere Datei: Schleife wird nie betreten)
         if (sscanf(line, format, frage, antwort) == 2) { // == 2: beide Felder erfolgreich gelesen
-            addElement(anfang, frage, antwort);
+            if (addElement(anfang, frage, antwort) != OK) { // Speicher prüfen
+                fclose(fptr);
+                return FEHLER_SPEICHER;
+            }
         }
     }
 
     fclose(fptr);
-    return 0;
+    return OK;
 }
 
-int writeToFile(DATEIKARTE *anfang, const char *dateiname) {
+FEHLERCODE writeToFile(DATEIKARTE *anfang, const char *dateiname) {
     FILE *fptr = fopen(dateiname, "w"); // "w" erstellt die Datei neu oder überschreibt sie
-    if (fptr == NULL) return 1;
+    if (fptr == NULL) return FEHLER_DATEI;
 
     DATEIKARTE *current = anfang;
     while (current != NULL) {
@@ -35,9 +38,9 @@ int writeToFile(DATEIKARTE *anfang, const char *dateiname) {
     }
 
     fclose(fptr);
-    return 0;
+    return OK;
 }
 
-int deleteFile(const char *dateiname) {
-    return remove(dateiname) == 0 ? 0 : 1; // remove gibt 0 bei Erfolg zurück
+FEHLERCODE deleteFile(const char *dateiname) {
+    return remove(dateiname) == 0 ? OK : FEHLER_DATEI; // remove gibt 0 bei Erfolg zurück
 }

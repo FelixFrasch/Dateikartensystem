@@ -6,7 +6,8 @@
 #include "fileio.h"
 #include "abfrage.h"
 
-void readFromFileTerminal(DATEIKARTE **anfang);
+void zeigeErgebnis(FEHLERCODE code, const char *aktion);
+void frageDateiname(char *out, int maxLen);
 void deleteElementFromTerminal(DATEIKARTE **anfang);
 void addElementFromTerminal(DATEIKARTE **anfang);
 void printInfo();
@@ -31,7 +32,8 @@ int main(void) {
         }
         while (getchar() != '\n') {} // stellt sicher, dass der Eingabepuffer leer ist
 
-        if (userInput)
+        if (userInput) {
+            char dateiname[260]; // Puffer für variablen Dateinamen
             switch (userInput) {
         case 'q': deleteList(&dateikarte); // Programm beenden
                 return 0;
@@ -48,39 +50,63 @@ int main(void) {
         case 's': sortList(&dateikarte, 1); // nach ID sortieren
                 break;
         case 'w': // in Datei schreiben
-                if (writeToFile(dateikarte, DATEINAME) == 0)
-                    printf("Erfolgreich gespeichert.\n");
-                else
-                    printf("Fehler beim Schreiben der Datei!\n");
+                frageDateiname(dateiname, sizeof(dateiname));
+                if (dateiname[0] == '\0') break;
+                zeigeErgebnis(writeToFile(dateikarte, dateiname), "Speichern");
                 break;
-        case 'r': readFromFileTerminal(&dateikarte); // aus Datei lesen
+        case 'r': // aus Datei lesen
+                frageDateiname(dateiname, sizeof(dateiname));
+                if (dateiname[0] == '\0') break;
+                zeigeErgebnis(readFromFile(&dateikarte, dateiname), "Laden");
                 break;
         case 'd': // Datei löschen
-                if (deleteFile(DATEINAME) == 0)
-                    printf("Datei gelöscht.\n");
-                else
-                    printf("Fehler beim Löschen der Datei!\n");
+                frageDateiname(dateiname, sizeof(dateiname));
+                if (dateiname[0] == '\0') break;
+                zeigeErgebnis(deleteFile(dateiname), "Datei löschen");
                 break;
         case 'a': abfrageStarten(dateikarte); // Abfrage starten
                 break;
         default: printf("Ungültige Eingabe.\n");
                 break;
             }
+        }
         printf("Drücke Enter, um weiter zu machen...");
         getchar(); // wartet auf Enter
 
     }
 }
 
-void readFromFileTerminal(DATEIKARTE **anfang) {
-    // Hilfsfunktion, die Rückgabecodes von readFromFile in Texte übersetzt
-    int code = readFromFile(anfang, DATEINAME);
+// Gibt eine einheitliche Erfolgs- oder Fehlermeldung aus.
+// aktion beschreibt den Vorgang (z.B. "Speichern"), der in der Meldung erscheint.
+void zeigeErgebnis(FEHLERCODE code, const char *aktion) {
     switch (code) {
-    case 0: printf("Karteikarten erfolgreich geladen.\n");
-            break;
-    case 1: printf("Datei nicht gefunden!\n");
-            break;
-    default: printf("Unbekannter Rückgabewert!\n");
+    case OK:                    printf("%s erfolgreich.\n", aktion);                        break;
+    case FEHLER_SPEICHER:       printf("%s fehlgeschlagen: Kein Speicher verfügbar.\n", aktion); break;
+    case FEHLER_LISTE_LEER:     printf("%s fehlgeschlagen: Liste ist leer.\n", aktion);    break;
+    case FEHLER_NICHT_GEFUNDEN: printf("%s fehlgeschlagen: Element nicht gefunden.\n", aktion); break;
+    case FEHLER_DATEI:          printf("%s fehlgeschlagen: Dateifehler.\n", aktion);       break;
+    default:                    printf("%s: Unbekannter Fehler.\n", aktion);               break;
+    }
+}
+
+// Fragt nach einem Dateinamen und stellt sicher, dass er auf .csv endet.
+// Schreibt das Ergebnis in out (maxLen Bytes inkl. '\0').
+void frageDateiname(char *out, int maxLen) {
+    printf("Dateiname (Enter für \"%s\"): ", DATEINAME);
+    if (fgets(out, maxLen, stdin) == NULL) { out[0] = '\0'; return; }
+    out[strcspn(out, "\n")] = '\0'; // \n entfernen
+
+    if (out[0] == '\0') { // leere Eingabe -> Standardname
+        strncpy(out, DATEINAME, maxLen - 1);
+        out[maxLen - 1] = '\0';
+        return;
+    }
+
+    // .csv anhängen, falls die Erweiterung fehlt
+    int len = (int)strlen(out);
+    if (len < 4 || strcmp(out + len - 4, ".csv") != 0) {
+        if (len + 4 < maxLen)
+            strcat(out, ".csv");
     }
 }
 
@@ -101,12 +127,12 @@ void deleteElementFromTerminal(DATEIKARTE **anfang) {
         return;
     }
 
-    int code = deleteElement(anfang, id);
-    switch (code) {
-    case 0: printf("Element mit ID %d gelöscht.\n", id); break;
-    case 1: printf("Die Liste ist leer!\n"); break;
-    case 2: printf("Element mit ID %d nicht gefunden!\n", id); break;
-    default: printf("Unbekannter Fehler.\n"); break;
+    // Eigene Meldungen, um die ID in der Ausgabe zu zeigen
+    switch (deleteElement(anfang, id)) {
+    case OK:                    printf("Element mit ID %d gelöscht.\n", id);         break;
+    case FEHLER_LISTE_LEER:     printf("Die Liste ist leer!\n");                     break;
+    case FEHLER_NICHT_GEFUNDEN: printf("Element mit ID %d nicht gefunden!\n", id);   break;
+    default:                    printf("Unbekannter Fehler.\n");                     break;
     }
 }
 
@@ -134,7 +160,7 @@ void addElementFromTerminal(DATEIKARTE **anfang) {
     }
     antwort[strcspn(antwort, "\n")] = '\0';
 
-    addElement(anfang, frage, antwort);
+    zeigeErgebnis(addElement(anfang, frage, antwort), "Karte hinzufügen");
 }
 
 void printInfo() {

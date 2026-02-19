@@ -16,11 +16,11 @@ typedef struct dateikarte {
     struct dateikarte *prev;
 } DATEIKARTE;
 
-// Fügt ein neues Element am Ende der Liste hinzu. Gibt Pointer auf neues Element zurück, NULL bei Fehler.
-DATEIKARTE *addElement(DATEIKARTE **anfang, const char frage[], const char antwort[]);
+// Fügt ein neues Element am Ende der Liste hinzu. Gibt OK oder FEHLER_SPEICHER zurück.
+FEHLERCODE addElement(DATEIKARTE **anfang, const char frage[], const char antwort[]);
 
-// Löscht das Element mit der angegebenen ID. Gibt 0=OK, 1=Liste leer, 2=nicht gefunden zurück.
-int deleteElement(DATEIKARTE **anfang, int id);
+// Löscht das Element mit der angegebenen ID. Gibt OK, FEHLER_LISTE_LEER oder FEHLER_NICHT_GEFUNDEN zurück.
+FEHLERCODE deleteElement(DATEIKARTE **anfang, int id);
 
 // Löscht alle Elemente der Liste und gibt den Speicher frei. Setzt *anfang auf NULL.
 void deleteList(DATEIKARTE **anfang);
