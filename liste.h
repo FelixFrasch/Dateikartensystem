@@ -1,13 +1,18 @@
 #ifndef TESTATAUFGABE_FELIXFRASCH_1_0_LISTE_H
 #define TESTATAUFGABE_FELIXFRASCH_1_0_LISTE_H
 
+#include <time.h>
 #include "config.h"
 
-// Inhalt einer Karteikarte (ausgelagert damit swapKarten nur Pointer tauscht, nicht Knoten)
+// Inhalt einer Karteikarte (ausgelagert damit swapKarten nur den inhalt-Pointer tauscht, nicht Knoten)
 typedef struct karteninhalt {
-    int id;
-    char frage[FLENGTH];
-    char antwort[ALENGTH];
+    int    id;
+    char   frage[FLENGTH];
+    char   antwort[ALENGTH];
+    int    intervall;        // Tage bis zur nächsten Wiederholung (SM-2, startet bei 1)
+    int    wiederholungen;   // Anzahl erfolgreicher Wiederholungen in Folge
+    float  efFaktor;         // SM-2 Einfachheitsfaktor (min. 1.3, Start: 2.5)
+    time_t naechsteAbfrage;  // Unix-Zeitstempel der nächsten Abfrage (0 = sofort fällig)
 } KARTENINHALT;
 
 typedef struct dateikarte {

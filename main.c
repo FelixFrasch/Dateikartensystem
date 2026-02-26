@@ -102,11 +102,19 @@ void frageDateiname(char *out, int maxLen) {
         return;
     }
 
-    // .csv anhängen, falls die Erweiterung fehlt
+    // Prüfen ob die Datei bereits auf .csv endet
     int len = (int)strlen(out);
     if (len < 4 || strcmp(out + len - 4, ".csv") != 0) {
-        if (len + 4 < maxLen)
-            strcat(out, ".csv");
+        char *punkt = strrchr(out, '.'); // letzten Punkt im Dateinamen suchen
+        if (punkt != NULL) {
+            // Falsche Erweiterung: ab dem Punkt mit .csv überschreiben (z.B. "test.txt" -> "test.csv")
+            if ((int)(punkt - out) + 4 < maxLen)
+                strcpy(punkt, ".csv");
+        } else {
+            // Keine Erweiterung: .csv anhängen (z.B. "test" -> "test.csv")
+            if (len + 4 < maxLen)
+                strcat(out, ".csv");
+        }
     }
 }
 
@@ -180,6 +188,6 @@ void printInfo() {
 }
 
 void clearTerminal(const int count) {
-    for (int i = 0; i < count; ++i)
-        printf("\n");
+    (void)count;             // Parameter wird für Signatur-Kompatibilität beibehalten
+    printf("\033[2J\033[H"); // ANSI: Bildschirminhalt löschen und Cursor auf Position (1,1)
 }

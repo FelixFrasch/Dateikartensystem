@@ -28,6 +28,11 @@ FEHLERCODE addElement(DATEIKARTE **anfang, const char frage[], const char antwor
     strncpy(inhalt->antwort, antwort, ALENGTH - 1);
     inhalt->antwort[ALENGTH - 1] = '\0';
 
+    inhalt->intervall       = 1;    // Startwert für das Lernintervall in Tagen
+    inhalt->wiederholungen  = 0;    // Noch keine Wiederholung erfolgt
+    inhalt->efFaktor        = 2.5f; // SM-2 Standardwert
+    inhalt->naechsteAbfrage = 0;    // Epoch 0 liegt in der Vergangenheit → sofort fällig
+
     neu->inhalt = inhalt;
     neu->next = NULL;
     neu->prev = NULL;
@@ -86,9 +91,26 @@ void printList(DATEIKARTE *anfang) {
         printf("Liste ist leer\n");
         return;
     }
+    time_t jetzt = time(NULL); // aktueller Zeitstempel zum Vergleich der Fälligkeiten
     printf("-------------------- Anfang der Liste --------------------\n");
     while (anfang != NULL) {
-        printf("%d:\tQ: %s\n\tA: %s\n", anfang->inhalt->id, anfang->inhalt->frage, anfang->inhalt->antwort);
+        KARTENINHALT *k = anfang->inhalt;
+        printf("%d:\tQ: %s\n\tA: %s\n", k->id, k->frage, k->antwort);
+
+        // Lernstatus anzeigen
+        long sek = (long)(k->naechsteAbfrage - jetzt);
+        if (k->wiederholungen >= GELERNT_SCHWELLE) {
+            if (sek <= 0)
+                printf("\t[GELERNT] Faellig\n");
+            else
+                printf("\t[GELERNT] Naechste Wiederholung in %ld Tag(e)\n", sek / 86400 + 1);
+        } else if (sek <= 0) {
+            printf("\tFaellig | Wdh.: %d | Intervall: %d Tag(e)\n",
+                   k->wiederholungen, k->intervall);
+        } else {
+            printf("\tIn %ld Tag(e) faellig | Wdh.: %d | Intervall: %d Tag(e)\n",
+                   sek / 86400 + 1, k->wiederholungen, k->intervall);
+        }
         anfang = anfang->next;
     }
     printf("--------------------- Ende der Liste ---------------------\n");
