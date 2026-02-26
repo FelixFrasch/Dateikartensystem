@@ -97,6 +97,7 @@ static int durchlauf(DATEIKARTE **pool, int n, DATEIKARTE **falschPool,
     for (int i = 0; i < n; i++) {
         DATEIKARTE *karte = pool[i];
         char antwort[ALENGTH];
+        int faellig = istFaellig(karte->inhalt); // SM-2 nur für fällige Karten anwenden
 
         printf("\n[%d/%d] Frage: %s\n", i + 1, n, karte->inhalt->frage);
 
@@ -104,6 +105,10 @@ static int durchlauf(DATEIKARTE **pool, int n, DATEIKARTE **falschPool,
         if (karte->inhalt->wiederholungen >= GELERNT_SCHWELLE)
             printf("      [GELERNT – Wdh.: %d | Intervall: %d Tag(e)]\n",
                    karte->inhalt->wiederholungen, karte->inhalt->intervall);
+
+        // Hinweis wenn die Karte noch nicht fällig ist: SM-2 bleibt unverändert
+        if (!faellig)
+            printf("      (Noch nicht faellig – Lernfortschritt wird nicht veraendert)\n");
 
         while (1) {
             printf("Antwort (h=Hinweis, q=Beenden): ");
@@ -140,16 +145,29 @@ static int durchlauf(DATEIKARTE **pool, int n, DATEIKARTE **falschPool,
             }
 
             int korrekt = (vergleicheIgnoreCase(antwortNorm, erwartetNorm) == 0);
-            aktualisiereKarte(karte->inhalt, korrekt); // SM-2 anwenden und Karte aktualisieren
 
-            if (korrekt) {
-                printf("Richtig! (Naechste Wiederholung in %d Tag(e))\n",
-                       karte->inhalt->intervall);
-                if (zaehltFuerScore) richtig++;
+            if (faellig) {
+                // Fällige Karte: SM-2 anwenden, Intervall aktualisieren
+                aktualisiereKarte(karte->inhalt, korrekt);
+                if (korrekt) {
+                    printf("Richtig! (Naechste Wiederholung in %d Tag(e))\n",
+                           karte->inhalt->intervall);
+                    if (zaehltFuerScore) richtig++;
+                } else {
+                    printf("Falsch! Erwartet: %s\n", karte->inhalt->antwort);
+                    falschPool[*falschAnzahl] = karte;
+                    (*falschAnzahl)++;
+                }
             } else {
-                printf("Falsch! Erwartet: %s\n", karte->inhalt->antwort);
-                falschPool[*falschAnzahl] = karte;
-                (*falschAnzahl)++;
+                // Nicht fällige Karte: kein SM-2 Update, nur Rückmeldung zur Übung
+                if (korrekt) {
+                    printf("Richtig! (Kein SM-2 Update – Karte war noch nicht faellig)\n");
+                    if (zaehltFuerScore) richtig++;
+                } else {
+                    printf("Falsch! Erwartet: %s (Kein SM-2 Update)\n", karte->inhalt->antwort);
+                    falschPool[*falschAnzahl] = karte;
+                    (*falschAnzahl)++;
+                }
             }
             break; // weiter zur nächsten Karte
         }

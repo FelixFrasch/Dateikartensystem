@@ -54,8 +54,6 @@ static void autoSpeichern(DATEIKARTE *anfang) {
 
 int main(void) {
     char userInput = 0;
-    clearTerminal(0);
-    printInfo();
     DATEIKARTE *dateikarte = NULL; // Pointer auf das erste Element der Liste, NULL = leere Liste
 
     while (1) {
