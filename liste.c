@@ -152,6 +152,26 @@ int compareKarten(const DATEIKARTE *a, const DATEIKARTE *b, int mode) {
     return 0;
 }
 
+FEHLERCODE editElement(DATEIKARTE **anfang, int id, const char *neueFrage, const char *neueAntwort) {
+    if (*anfang == NULL) return FEHLER_LISTE_LEER;
+
+    DATEIKARTE *current = *anfang;
+    while (current && current->inhalt->id != id)
+        current = current->next;
+
+    if (current == NULL) return FEHLER_NICHT_GEFUNDEN;
+
+    if (neueFrage[0] != '\0') { // leerer String = Feld unverändert lassen
+        strncpy(current->inhalt->frage, neueFrage, FLENGTH - 1);
+        current->inhalt->frage[FLENGTH - 1] = '\0';
+    }
+    if (neueAntwort[0] != '\0') {
+        strncpy(current->inhalt->antwort, neueAntwort, ALENGTH - 1);
+        current->inhalt->antwort[ALENGTH - 1] = '\0';
+    }
+    return OK;
+}
+
 void swapKarten(DATEIKARTE *a, DATEIKARTE *b) {
     // Tauscht nur die Inhalts-Pointer – kein aufwendiges Umhängen von Listenknoten nötig
     KARTENINHALT *tmp = a->inhalt;

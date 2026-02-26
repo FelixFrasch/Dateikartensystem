@@ -42,4 +42,9 @@ int compareKarten(const DATEIKARTE *a, const DATEIKARTE *b, int mode);
 // Tauscht die Inhalts-Pointer zweier Knoten (kein aufwendiges Umhängen der Listenknoten nötig).
 void swapKarten(DATEIKARTE *a, DATEIKARTE *b);
 
+// Bearbeitet Frage und/oder Antwort des Elements mit der angegebenen ID.
+// Leere Strings lassen das jeweilige Feld unverändert.
+// Gibt OK, FEHLER_LISTE_LEER oder FEHLER_NICHT_GEFUNDEN zurück.
+FEHLERCODE editElement(DATEIKARTE **anfang, int id, const char *neueFrage, const char *neueAntwort);
+
 #endif //TESTATAUFGABE_FELIXFRASCH_1_0_LISTE_H
