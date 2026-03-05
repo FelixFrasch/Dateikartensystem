@@ -6,7 +6,7 @@
 // Liest Karteikarten aus dateiname und ersetzt die aktuelle Liste. Gibt OK oder FEHLER_DATEI zurück.
 FEHLERCODE readFromFile(DATEIKARTE **anfang, const char *dateiname);
 
-// Schreibt alle Karteikarten im Format "frage;antwort" in dateiname. Gibt OK oder FEHLER_DATEI zurück.
+// Schreibt alle Karteikarten inkl. SM-2 Lernfortschritt in dateiname. Gibt OK, FEHLER_LISTE_LEER oder FEHLER_DATEI zurück.
 FEHLERCODE writeToFile(DATEIKARTE *anfang, const char *dateiname);
 
 // Löscht die angegebene Datei vom Dateisystem. Gibt OK oder FEHLER_DATEI zurück.
